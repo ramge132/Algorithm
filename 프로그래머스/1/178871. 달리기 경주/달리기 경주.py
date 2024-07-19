@@ -1,12 +1,14 @@
 def solution(players, callings):
-    player_positions = {player: i for i, player in enumerate(players)}
+    # 선수 이름을 키, 순서를 값으로 하는 딕셔너리 생성
+    player_dict = {player: idx for idx, player in enumerate(players)}
     
-    for calling in callings:
-        current_position = player_positions[calling]
-        if current_position > 0:
-            previous_player = players[current_position - 1]
-            players[current_position - 1], players[current_position] = players[current_position], players[current_position - 1]
-            player_positions[calling] -= 1
-            player_positions[previous_player] += 1
-            
+    for call in callings:
+        idx = player_dict[call]
+        # 추월한 선수와 자리 바꾸기
+        if idx > 0:
+            # 앞의 선수와 위치를 바꾸기
+            player_dict[players[idx - 1]], player_dict[players[idx]] = player_dict[players[idx]], player_dict[players[idx - 1]]
+            # 선수 배열도 갱신
+            players[idx - 1], players[idx] = players[idx], players[idx - 1]
+    
     return players
