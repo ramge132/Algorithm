@@ -8,4 +8,3 @@ sequences = permutations(numbers, M)
 
 for sequence in sequences:
     print(' '.join(map(str, sequence)))
-
