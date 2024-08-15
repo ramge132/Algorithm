@@ -1,99 +1,57 @@
-def is_valid(grid, x, y, direction, n):
-    # direction에 따른 dx, dy 설정 (상, 하, 좌, 우)
-    if direction == 0:  # 상
-        dx, dy = -1, 0
-    elif direction == 1:  # 하
-        dx, dy = 1, 0
-    elif direction == 2:  # 좌
-        dx, dy = 0, -1
-    elif direction == 3:  # 우
-        dx, dy = 0, 1
-
-    # 전선을 놓으려는 방향으로 진행하면서 확인
+def is_valid(board, x, y, direction, N):
+    # 전선을 연결할 수 있는지 확인하는 함수
+    dx, dy = direction
     nx, ny = x + dx, y + dy
-    while 0 <= nx < n and 0 <= ny < n:
-        if grid[nx][ny] != 0:
+    while 0 <= nx < N and 0 <= ny < N:
+        if board[nx][ny] != 0:
             return False
         nx += dx
         ny += dy
     return True
 
-def place_wire(grid, x, y, direction, n):
-    wire_length = 0
-    if direction == 0:  # 상
-        dx, dy = -1, 0
-    elif direction == 1:  # 하
-        dx, dy = 1, 0
-    elif direction == 2:  # 좌
-        dx, dy = 0, -1
-    elif direction == 3:  # 우
-        dx, dy = 0, 1
-
+def set_wire(board, x, y, direction, N, value):
+    # 전선을 설치하거나 제거하는 함수
+    dx, dy = direction
     nx, ny = x + dx, y + dy
-    while 0 <= nx < n and 0 <= ny < n:
-        grid[nx][ny] = 2  # 전선 설치
-        wire_length += 1
+    length = 0
+    while 0 <= nx < N and 0 <= ny < N:
+        board[nx][ny] = value
+        length += 1
         nx += dx
         ny += dy
+    return length
 
-    return wire_length
-
-def remove_wire(grid, x, y, direction, n):
-    if direction == 0:  # 상
-        dx, dy = -1, 0
-    elif direction == 1:  # 하
-        dx, dy = 1, 0
-    elif direction == 2:  # 좌
-        dx, dy = 0, -1
-    elif direction == 3:  # 우
-        dx, dy = 0, 1
-
-    nx, ny = x + dx, y + dy
-    while 0 <= nx < n and 0 <= ny < n:
-        grid[nx][ny] = 0  # 전선 제거
-        nx += dx
-        ny += dy
-
-def backtrack(grid, cores, idx, connected, wire_sum, n):
-    global max_connected, min_wire_length
-
-    if idx == len(cores):
-        if connected > max_connected or (connected == max_connected and wire_sum < min_wire_length):
-            max_connected = connected
-            min_wire_length = wire_sum
+def backtrack(board, cores, index, connected, wire_length, max_cores, min_wire_length, N):
+    if index == len(cores):
+        # 모든 Core에 대해 탐색을 마친 경우
+        if connected > max_cores[0] or (connected == max_cores[0] and wire_length < min_wire_length[0]):
+            max_cores[0] = connected
+            min_wire_length[0] = wire_length
         return
 
-    x, y = cores[idx]
+    x, y = cores[index]
+    for direction in [(0, 1), (1, 0), (0, -1), (-1, 0)]:
+        if is_valid(board, x, y, direction, N):
+            length = set_wire(board, x, y, direction, N, 2)
+            backtrack(board, cores, index + 1, connected + 1, wire_length + length, max_cores, min_wire_length, N)
+            set_wire(board, x, y, direction, N, 0)
     
-    # 현재 Core를 연결하지 않는 경우
-    backtrack(grid, cores, idx + 1, connected, wire_sum, n)
-
-    # 네 방향으로 전선을 연결하는 경우
-    for direction in range(4):
-        if is_valid(grid, x, y, direction, n):
-            wire_length = place_wire(grid, x, y, direction, n)
-            backtrack(grid, cores, idx + 1, connected + 1, wire_sum + wire_length, n)
-            remove_wire(grid, x, y, direction, n)
-
-def solve(test_case, n, grid):
-    cores = []
-    
-    # 코어 리스트 작성
-    for i in range(1, n-1):
-        for j in range(1, n-1):
-            if grid[i][j] == 1:
-                cores.append((i, j))
-    
-    global max_connected, min_wire_length
-    max_connected = 0
-    min_wire_length = float('inf')
-    
-    backtrack(grid, cores, 0, 0, 0, n)
-    
-    print(f'#{test_case} {min_wire_length}')
+    # 현재 Core를 연결하지 않고 다음으로 넘어가는 경우
+    backtrack(board, cores, index + 1, connected, wire_length, max_cores, min_wire_length, N)
 
 T = int(input())
-for t in range(1, T + 1):
-    n = int(input())
-    grid = [list(map(int, input().split())) for _ in range(n)]
-    solve(t, n, grid)
+for test_case in range(1, T + 1):
+    N = int(input())
+    board = [list(map(int, input().split())) for _ in range(N)]
+    
+    cores = []
+    for i in range(1, N - 1):
+        for j in range(1, N - 1):
+            if board[i][j] == 1:
+                cores.append((i, j))
+    
+    max_cores = [0]
+    min_wire_length = [float('inf')]
+    backtrack(board, cores, 0, 0, 0, max_cores, min_wire_length, N)
+    
+    print(f"#{test_case} {min_wire_length[0]}")
