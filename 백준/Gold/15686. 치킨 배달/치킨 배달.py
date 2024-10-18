@@ -4,29 +4,28 @@ N, M = map(int, input().split())
 city = [list(map(int, input().split())) for _ in range(N)]
 
 houses = []
-chicken_shops = []
+chickens = []
 
-for r in range(N):
-    for c in range(N):
-        if city[r][c] == 1:
-            houses.append((r, c))
-        elif city[r][c] == 2:
-            chicken_shops.append((r, c))
+for i in range(N):
+    for j in range(N):
+        if city[i][j] == 1:
+            houses.append((i, j))
+        elif city[i][j] == 2:
+            chickens.append((i, j))
 
-# 치킨 거리를 계산하는 함수
-def get_chicken_distance(selected_chickens):
+def get_city_chicken_distance(selected_chickens):
     total_distance = 0
     for hx, hy in houses:
         min_distance = float('inf')
         for cx, cy in selected_chickens:
-            distance = abs(hx - cx) + abs(hy - cy)
+            distance = abs(hx - cx) + abs(hy- cy)
             min_distance = min(min_distance, distance)
         total_distance += min_distance
     return total_distance
 
-# 모든 치킨집 조합 중에서 최적의 조합을 탐색
-min_distance = float('inf')
-for chickens in combinations(chicken_shops, M):
-    min_distance = min(min_distance, get_chicken_distance(chickens))
+min_chicken_distance = float('inf')
+for selected_chickens in combinations(chickens, M):
+    city_chicken_distance = get_city_chicken_distance(selected_chickens)
+    min_chicken_distance = min(min_chicken_distance, city_chicken_distance)
 
-print(min_distance)
+print(min_chicken_distance)
