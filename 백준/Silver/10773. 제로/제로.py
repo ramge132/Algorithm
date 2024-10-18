@@ -1,18 +1,11 @@
-
 K = int(input())
 lst = []
-result = 0
 
 for _ in range(K):
     lst.append(int(input()))
 
-mistake = 0
-answer = 0
 
-def pop_num(lst):
-    global mistake
-    global answer
-
+def pop_num(lst, answer, mistake):
     while lst:
         num = lst.pop()
 
@@ -28,8 +21,7 @@ def pop_num(lst):
         elif num == 0 and mistake == 0:
             mistake += 1
 
+    return answer
 
 
-pop_num(lst)
-
-print(answer)
+print(pop_num(lst, 0, 0))
